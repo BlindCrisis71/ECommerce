@@ -4,25 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Post;
 use Illuminate\Http\Request;
-use Illuminate\Session\Store;
 
 class PostController extends Controller
 {
-    public function getIndex(Store $session) {
-      $post = new Post();
-      $posts = $post->getPosts($session);
+    public function getIndex() {
+      $posts = Post::orderBy('created_at', 'desc')->paginate(3);
       return view('blog.index', ['posts' => $posts]);
     }
 
-    public function getAdminIndex(Store $session) {
-      $post = new Post();
-      $posts = $post->getPosts($session);
+    public function getAdminIndex() {
+      $posts = Post::orderBy('title', 'asc')->get();
       return view('admin.index', ['posts' => $posts]);
     }
 
-    public function getPost(Store $session, $id) {
-      $post = new Post();
-      $post = $post->getPost($session, $id);
+    public function getPost($id) {
+      $post = Post::where('id', '=', $id)->first();
       return view('blog.post', ['post' => $post]);
     }
 
@@ -30,30 +26,42 @@ class PostController extends Controller
       return view('admin.create');
     }
 
-    public function getAdminEdit(Store $session, $id) {
-      $post = new Post();
-      $post = $post->getPost($session, $id);
+    public function getAdminEdit($id) {
+      $post = Post::find($id);
       return view('admin.edit', ['post' => $post, 'postId' => $id]);
     }
 
-    public function postAdminCreate(Store $session, Request $request) {
+    public function postAdminCreate(Request $request) {
       $this->validate($request, [
         'title' => 'required|min:3',
         'description' => 'required|min:10'
       ]);
-      $post = new Post();
-      $post->addPost($session, $request->input('title'), $request->input('price'), $request->input('description'));
+      $post = new Post([
+          'title' => $request->input('title'),
+          'price' => $request->input('price'),
+          'description' => $request->input('description')
+      ]);
+      $post->save();
       return redirect()->route('admin.index')->with('info', 'Post created, Title is: ' . $request->input('title'));
     }
 
-    public function postAdminUpdate(Store $session, Request $request) {
+    public function postAdminUpdate(Request $request) {
       $this->validate($request, [
         'title' => 'required|min:3',
         'description' => 'required|min:10'
       ]);
-      $post = new Post();
-      $post->editPost($session, $request->input('id'), $request->input('title'), $request->input('price'), $request->input('description'));
+      $post = Post::find($request->input('id'));
+      $post->title = $request->input('title');
+      $post->price = $request->input('price');
+      $post->description = $request->input('description');
+      $post->save();
       return redirect()->route('admin.index')->with('info', 'Post edited, new Title is: ' . $request->input('title'));
+    }
+
+    public function postAdminDelete($id){
+        $post = Post::find($id);
+        $post->delete();
+        return redirect()->route('admin.index')->with('info', 'Post deleted');
     }
 }
 

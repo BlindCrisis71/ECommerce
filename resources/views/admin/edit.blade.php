@@ -12,7 +12,7 @@
                             class="form-control"
                             id="title"
                             name="title"
-                            value="{{ $post['title'] }}">
+                            value="{{ $post->title }}">
                 </div>
                 <div class="form-group">
                     <label for="price">Price</label>
@@ -21,7 +21,7 @@
                             class="form-control"
                             id="price"
                             name="price"
-                            value="{{ $post['price'] }}">
+                            value="{{ $post->price }}">
                 </div>
                 <div class="form-group">
                     <label for="description">Description</label>
@@ -30,7 +30,7 @@
                             class="form-control"
                             id="description"
                             name="description"
-                            value="{{ $post['description'] }}">
+                            value="{{ $post->description }}">
                 </div>
                 {{ csrf_field() }}
                 <input type="hidden" name="id" value="{{ $postId }}">
