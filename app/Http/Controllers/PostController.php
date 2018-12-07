@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Post;
+use Auth;
+use Gate;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -36,12 +38,13 @@ class PostController extends Controller
         'title' => 'required|min:3',
         'description' => 'required|min:10'
       ]);
+      $user = Auth::user();
       $post = new Post([
           'title' => $request->input('title'),
           'price' => $request->input('price'),
           'description' => $request->input('description')
       ]);
-      $post->save();
+      $user->posts()->save($post);
       return redirect()->route('admin.index')->with('info', 'Post created, Title is: ' . $request->input('title'));
     }
 
@@ -51,6 +54,9 @@ class PostController extends Controller
         'description' => 'required|min:10'
       ]);
       $post = Post::find($request->input('id'));
+      if(Gate::denies('manipulate-post', $post)){
+          return redirect()->back();
+      }
       $post->title = $request->input('title');
       $post->price = $request->input('price');
       $post->description = $request->input('description');
@@ -60,6 +66,9 @@ class PostController extends Controller
 
     public function postAdminDelete($id){
         $post = Post::find($id);
+        if(Gate::denies('manipulate-post', $post)){
+            return redirect()->back();
+        }
         $post->delete();
         return redirect()->route('admin.index')->with('info', 'Post deleted');
     }

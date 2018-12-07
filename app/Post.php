@@ -7,5 +7,9 @@
 
     protected $fillable = ['title', 'price', 'description'];
 
+    public function user(){
+        return $this->belongsTo('App\User');
+    }
+
   }
 
